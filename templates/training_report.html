@@ -1,183 +1,64 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Training Report</title>
-  <style>
-    :root {
-      --bg: #f4efe6;
-      --panel: rgba(255, 252, 247, 0.9);
-      --ink: #1f2430;
-      --accent: #0f766e;
-      --line: rgba(31, 36, 48, 0.12);
-      --shadow: 0 24px 80px rgba(31, 36, 48, 0.12);
-      --muted: rgba(31, 36, 48, 0.68);
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Georgia, "Times New Roman", serif;
-      color: var(--ink);
-      background:
-        radial-gradient(circle at top left, rgba(15, 118, 110, 0.18), transparent 35%),
-        radial-gradient(circle at right 20%, rgba(180, 71, 8, 0.16), transparent 30%),
-        linear-gradient(160deg, #f7f1e8, #efe3d3 65%, #eadaca);
-      min-height: 100vh;
-      padding: 32px 16px;
-    }
-    .wrap { max-width: 1120px; margin: 0 auto; }
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(16px);
-      padding: 28px;
-    }
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      align-items: center;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-    a.link {
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: bold;
-    }
-    h1 {
-      margin: 0;
-      font-size: clamp(2rem, 4vw, 3.2rem);
-      line-height: 0.95;
-      letter-spacing: -0.04em;
-    }
-    p.lead {
-      margin: 8px 0 0;
-      color: var(--muted);
-      max-width: 700px;
-    }
-    .error {
-      border-radius: 14px;
-      padding: 12px 14px;
-      margin: 16px 0;
-      background: rgba(180, 35, 24, 0.10);
-      color: #b42318;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin: 24px 0;
-    }
-    .card {
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 16px;
-      background: rgba(255, 255, 255, 0.72);
-    }
-    .label {
-      font-size: 0.82rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      opacity: 0.7;
-      margin-bottom: 8px;
-    }
-    .value {
-      font-size: 1.5rem;
-      margin: 0;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 12px;
-    }
-    th, td {
-      text-align: left;
-      border-bottom: 1px solid var(--line);
-      padding: 12px 8px;
-    }
-    th { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.7; }
-    .badge {
-      display: inline-block;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(15, 118, 110, 0.12);
-      color: var(--accent);
-      font-size: 0.84rem;
-      font-weight: bold;
-    }
-    .plots {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 16px;
-      margin-top: 20px;
-    }
-    .plots img {
-      width: 100%;
-      border-radius: 16px;
-      border: 1px solid var(--line);
-      background: white;
-    }
-    ul { padding-left: 20px; }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <div class="panel">
-      <div class="topbar">
-        <div>
-          <h1>Training Report</h1>
-          <p class="lead">Review the currently saved model comparison, selected model, training metadata, and generated evaluation plots.</p>
+{% extends "base.html" %}
+{% set active_page = "training" %}
+{% block title %}Training Report{% endblock %}
+
+{% block content %}
+  <section class="page-hero">
+    <div>
+      <p class="eyebrow"><span class="material-symbols-outlined">analytics</span> Model Intelligence</p>
+      <h1>Training Report</h1>
+      <p class="lead">Review the currently saved model comparison, selected model, training metadata, and generated evaluation plots.</p>
+    </div>
+    <div class="hero-action">
+      <a class="btn ghost" href="/"><span class="material-symbols-outlined">arrow_back</span> Back To Analyzer</a>
+    </div>
+  </section>
+
+  {% if error %}
+    <div class="alert error">{{ error }}</div>
+  {% endif %}
+
+  {% if report %}
+    <section class="panel">
+      <div class="grid">
+        <div class="card">
+          <div class="label">Selected Model</div>
+          <p class="value-sm">{{ report.selected_model }}</p>
         </div>
-        <a class="link" href="/">Back To Analyzer</a>
+        <div class="card">
+          <div class="label">Dataset Mode</div>
+          <p class="value-sm">{{ report.dataset_mode }}</p>
+        </div>
+        <div class="card">
+          <div class="label">Training Rows</div>
+          <p class="value">{{ report.training_rows }}</p>
+        </div>
+        <div class="card">
+          <div class="label">Test Rows</div>
+          <p class="value">{{ report.test_rows }}</p>
+        </div>
+        <div class="card">
+          <div class="label">Feature Count</div>
+          <p class="value">{{ report.feature_count }}</p>
+        </div>
+        <div class="card">
+          <div class="label">Threshold</div>
+          <p class="value">{{ report.threshold }}</p>
+        </div>
       </div>
 
-      {% if error %}
-        <div class="error">{{ error }}</div>
-      {% endif %}
+      <div class="card" style="margin-top: 18px;">
+        <div class="label">Data Sources</div>
+        <ul>
+          {% for data_path in report.data_paths %}
+            <li>{{ data_path }}</li>
+          {% endfor %}
+        </ul>
+      </div>
 
-      {% if report %}
-        <div class="grid">
-          <div class="card">
-            <div class="label">Selected Model</div>
-            <p class="value">{{ report.selected_model }}</p>
-          </div>
-          <div class="card">
-            <div class="label">Dataset Mode</div>
-            <p class="value">{{ report.dataset_mode }}</p>
-          </div>
-          <div class="card">
-            <div class="label">Training Rows</div>
-            <p class="value">{{ report.training_rows }}</p>
-          </div>
-          <div class="card">
-            <div class="label">Test Rows</div>
-            <p class="value">{{ report.test_rows }}</p>
-          </div>
-          <div class="card">
-            <div class="label">Feature Count</div>
-            <p class="value">{{ report.feature_count }}</p>
-          </div>
-          <div class="card">
-            <div class="label">Threshold</div>
-            <p class="value">{{ report.threshold }}</p>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="label">Data Sources</div>
-          <ul>
-            {% for data_path in report.data_paths %}
-              <li>{{ data_path }}</li>
-            {% endfor %}
-          </ul>
-        </div>
-
-        <div class="card" style="margin-top: 20px;">
-          <div class="label">Model Comparison</div>
+      <div class="card" style="margin-top: 18px;">
+        <div class="label">Model Comparison</div>
+        <div class="table-wrap">
           <table>
             <thead>
               <tr>
@@ -199,28 +80,27 @@
                   <td>{{ "%.4f"|format(row.recall) }}</td>
                   <td>{{ "%.4f"|format(row.f1) }}</td>
                   <td>{{ "%.4f"|format(row.roc_auc) }}</td>
-                  <td>{% if row.is_selected %}<span class="badge">Selected</span>{% endif %}</td>
+                  <td>{% if row.is_selected %}<span class="badge good">Selected</span>{% endif %}</td>
                 </tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
+      </div>
 
-        {% for row in report.model_rows %}
-          <div class="card" style="margin-top: 20px;">
-            <div class="label">{{ row.name }} Evaluation Plots</div>
-            <div class="plots">
-              {% if row.confusion_matrix_asset %}
-                <img src="/training-assets/{{ row.confusion_matrix_asset }}" alt="{{ row.name }} confusion matrix">
-              {% endif %}
-              {% if row.roc_curve_asset %}
-                <img src="/training-assets/{{ row.roc_curve_asset }}" alt="{{ row.name }} roc curve">
-              {% endif %}
-            </div>
+      {% for row in report.model_rows %}
+        <div class="card" style="margin-top: 18px;">
+          <div class="label">{{ row.name }} Evaluation Plots</div>
+          <div class="plots">
+            {% if row.confusion_matrix_asset %}
+              <img src="/training-assets/{{ row.confusion_matrix_asset }}" alt="{{ row.name }} confusion matrix">
+            {% endif %}
+            {% if row.roc_curve_asset %}
+              <img src="/training-assets/{{ row.roc_curve_asset }}" alt="{{ row.name }} roc curve">
+            {% endif %}
           </div>
-        {% endfor %}
-      {% endif %}
-    </div>
-  </div>
-</body>
-</html>
+        </div>
+      {% endfor %}
+    </section>
+  {% endif %}
+{% endblock %}

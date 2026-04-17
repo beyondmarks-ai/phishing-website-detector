@@ -6,3 +6,6 @@ pandas>=2.0,<3.0
 numpy>=1.24,<3.0
 xgboost>=2.0,<3.0
 python-whois>=0.9,<1.0
+nltk>=3.9,<4.0
+matplotlib>=3.9,<4.0
+seaborn>=0.13,<1.0

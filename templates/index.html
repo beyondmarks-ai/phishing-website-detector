@@ -1,326 +1,151 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Phishing Detector</title>
-  <style>
-    :root {
-      --bg: #f4efe6;
-      --panel: rgba(255, 252, 247, 0.88);
-      --ink: #1f2430;
-      --accent: #0f766e;
-      --danger: #b42318;
-      --warn: #b54708;
-      --line: rgba(31, 36, 48, 0.12);
-      --shadow: 0 24px 80px rgba(31, 36, 48, 0.12);
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Georgia, "Times New Roman", serif;
-      color: var(--ink);
-      background:
-        radial-gradient(circle at top left, rgba(15, 118, 110, 0.20), transparent 35%),
-        radial-gradient(circle at right 20%, rgba(180, 71, 8, 0.18), transparent 30%),
-        linear-gradient(160deg, #f7f1e8, #efe3d3 65%, #eadaca);
-      min-height: 100vh;
-      padding: 32px 16px;
-    }
-    .wrap {
-      max-width: 960px;
-      margin: 0 auto;
-    }
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(16px);
-      padding: 28px;
-    }
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      align-items: flex-start;
-      flex-wrap: wrap;
-    }
-    .link {
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: bold;
-      padding-top: 10px;
-    }
-    .hero-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.9fr);
-      gap: 18px;
-      margin: 22px 0 26px;
-    }
-    .hero-card {
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      padding: 18px;
-      background: rgba(255, 255, 255, 0.72);
-    }
-    .status-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 14px;
-    }
-    .status-tile {
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 14px;
-      background: rgba(255, 255, 255, 0.76);
-    }
-    .status-tile.good { box-shadow: inset 0 0 0 1px rgba(15, 118, 110, 0.12); }
-    .status-tile.bad { box-shadow: inset 0 0 0 1px rgba(180, 35, 24, 0.12); }
-    .status-tile.warn { box-shadow: inset 0 0 0 1px rgba(181, 71, 8, 0.12); }
-    .mini-label {
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      opacity: 0.7;
-      margin-bottom: 6px;
-    }
-    .mini-value {
-      font-size: 1.2rem;
-      margin: 0;
-      font-weight: bold;
-    }
-    .quick-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 16px;
-    }
-    .chip {
-      display: inline-block;
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: rgba(255, 255, 255, 0.78);
-      color: var(--ink);
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .activity-list {
-      margin: 16px 0 0;
-      padding-left: 20px;
-    }
-    .activity-list li {
-      margin-bottom: 10px;
-    }
-    h1 {
-      margin: 0 0 8px;
-      font-size: clamp(2rem, 4vw, 3.5rem);
-      line-height: 0.95;
-      letter-spacing: -0.04em;
-    }
-    p.lead {
-      margin: 0 0 24px;
-      max-width: 650px;
-      font-size: 1.05rem;
-    }
-    form {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-    input[type="text"] {
-      width: 100%;
-      padding: 16px 18px;
-      border-radius: 16px;
-      border: 1px solid var(--line);
-      font-size: 1rem;
-      background: rgba(255, 255, 255, 0.92);
-    }
-    button {
-      border: none;
-      border-radius: 16px;
-      padding: 16px 22px;
-      background: var(--ink);
-      color: white;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    .error, .warning {
-      border-radius: 14px;
-      padding: 12px 14px;
-      margin: 12px 0;
-    }
-    .error {
-      background: rgba(180, 35, 24, 0.10);
-      color: var(--danger);
-    }
-    .warning {
-      background: rgba(181, 71, 8, 0.08);
-      color: var(--warn);
-    }
-    .result-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-top: 20px;
-    }
-    .card {
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 16px;
-      background: rgba(255, 255, 255, 0.7);
-    }
-    .label {
-      font-size: 0.82rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      opacity: 0.7;
-      margin-bottom: 8px;
-    }
-    .score {
-      font-size: 2.4rem;
-      margin: 0;
-    }
-    .verdict {
-      display: inline-block;
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-weight: bold;
-    }
-    .verdict.bad { background: rgba(180, 35, 24, 0.12); color: var(--danger); }
-    .verdict.good { background: rgba(15, 118, 110, 0.12); color: var(--accent); }
-    ul { padding-left: 20px; }
-    code { word-break: break-all; }
-    @media (max-width: 720px) {
-      .hero-grid { grid-template-columns: 1fr; }
-      .status-grid { grid-template-columns: 1fr; }
-      form { grid-template-columns: 1fr; }
-      button { width: 100%; }
-    }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <div class="panel">
-      <div class="topbar">
-        <div>
-          <h1>Phishing Detector</h1>
-          <p class="lead">Analyze a URL using structural, domain, and page-level phishing signals. The model returns a verdict, risk score, and a short explanation of suspicious indicators.</p>
+{% extends "base.html" %}
+{% set active_page = "dashboard" %}
+{% block title %}Phishing Detector{% endblock %}
+
+{% block content %}
+  <section class="page-hero">
+    <div>
+      <p class="eyebrow"><span class="material-symbols-outlined">radar</span> Sovereign Security Framework</p>
+      <h1>Neutralize threats before they manifest.</h1>
+      <p class="lead">Phishing Detector analyzes structural, domain, and page-level signals to return a verdict, risk score, and focused explanation for suspicious URLs.</p>
+    </div>
+    <div class="hero-action">
+      <a class="btn ghost" href="/batch-analysis"><span class="material-symbols-outlined">upload_file</span> Batch Analysis</a>
+      <a class="btn secondary" href="/training-report"><span class="material-symbols-outlined">analytics</span> Training Report</a>
+    </div>
+  </section>
+
+  <section class="layout-12">
+    <div class="span-7">
+      <div class="panel">
+        <h2>URL Intelligence Console</h2>
+        <form class="scan-form" method="post" action="/analyze">
+          <input type="text" name="url" placeholder="Enter a URL such as https://example.com/login" value="{{ url_value }}">
+          <button type="submit"><span class="material-symbols-outlined">travel_explore</span> Analyze URL</button>
+        </form>
+
+        {% if error %}
+          <div class="alert error">{{ error }}</div>
+        {% endif %}
+
+        {% if result %}
+          <div class="grid" style="margin-top: 22px;">
+            <div class="card">
+              <div class="label">Verdict</div>
+              <span class="verdict {{ 'bad' if result.verdict == 'Phishing' else 'good' }}">{{ result.verdict }}</span>
+            </div>
+            <div class="card">
+              <div class="label">Risk Score</div>
+              <p class="score">{{ result.risk_score }}/100</p>
+            </div>
+            <div class="card">
+              <div class="label">Normalized URL</div>
+              <p class="value-sm mono">{{ result.normalized_url }}</p>
+            </div>
+          </div>
+
+          {% if result.warnings %}
+            {% for warning in result.warnings %}
+              <div class="alert warning">{{ warning }}</div>
+            {% endfor %}
+          {% endif %}
+
+          <div class="grid" style="margin-top: 18px;">
+            <div class="card">
+              <div class="label">Why It Was Flagged</div>
+              <ul>
+                {% for item in result.explanation_items %}
+                  <li>{{ item }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+            <div class="card">
+              <div class="label">Selected Signals</div>
+              <ul>
+                <li>HTTPS: {{ "Yes" if result.features["https_scheme"] else "No" }}</li>
+                <li>DNS resolved: {{ "Yes" if result.features["dns_resolves"] else "No" }}</li>
+                <li>Shortener: {{ "Yes" if result.features["shortener_domain"] else "No" }}</li>
+                <li>Suspicious TLD: {{ "Yes" if result.features["suspicious_tld"] else "No" }}</li>
+                <li>Password fields: {{ result.features["password_field_count"]|int }}</li>
+                <li>Content keywords: {{ result.features["phishing_keyword_count_content"]|int }}</li>
+              </ul>
+            </div>
+          </div>
+
+          <div style="margin-top: 18px;">
+            <a class="btn ghost" href="/analysis-detail?url={{ result.normalized_url|urlencode }}">
+              <span class="material-symbols-outlined">open_in_new</span> View Full Analysis Detail
+            </a>
+          </div>
+        {% else %}
+          <div class="card-muted" style="margin-top: 22px;">
+            <div class="label">Awaiting Scan</div>
+            <p class="muted" style="margin: 0;">Submit a URL to generate a risk verdict, model probability, feature breakdown, and export-ready analysis.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <aside class="span-5">
+      <div class="card">
+        <div class="label">System Snapshot</div>
+        <div class="grid">
+          {% for item in dashboard.status_items %}
+            <div class="card-muted">
+              <div class="label">{{ item.label }}</div>
+              <p class="value-sm">{{ item.value }}</p>
+            </div>
+          {% endfor %}
         </div>
-        <a class="link" href="/training-report">View Training Report</a>
+        {% if dashboard.training_error %}
+          <div class="alert warning">{{ dashboard.training_error }}</div>
+        {% endif %}
       </div>
 
-      <div class="hero-grid">
-        <div class="hero-card">
-          <div class="label">System Snapshot</div>
-          <div class="status-grid">
-            {% for item in dashboard.status_items %}
-              <div class="status-tile {{ item.tone }}">
-                <div class="mini-label">{{ item.label }}</div>
-                <p class="mini-value">{{ item.value }}</p>
+      <div class="card" style="margin-top: 18px;">
+        <div class="label">Current Training Context</div>
+        <p class="value-sm" style="margin-bottom: 16px;">{{ dashboard.selected_model }}</p>
+        <div class="grid">
+          <div>
+            <div class="label">Dataset Mode</div>
+            <p class="muted" style="margin-top: 0;">{{ dashboard.dataset_mode }}</p>
+          </div>
+          <div>
+            <div class="label">Rows</div>
+            <p class="muted" style="margin-top: 0;">Train: {{ dashboard.training_rows if dashboard.training_rows is not none else "N/A" }} | Test: {{ dashboard.test_rows if dashboard.test_rows is not none else "N/A" }}</p>
+          </div>
+          <div>
+            <div class="label">Feature Count</div>
+            <p class="muted" style="margin-top: 0;">{{ dashboard.feature_count if dashboard.feature_count is not none else "N/A" }}</p>
+          </div>
+        </div>
+        <div class="hero-action" style="justify-content: flex-start; margin-top: 16px;">
+          {% for item in dashboard.quick_links %}
+            <a class="btn secondary" href="{{ item.href }}">{{ item.label }}</a>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 18px;">
+        <div class="label">Recent Activity</div>
+        {% if dashboard.recent_activity %}
+          <div class="stream">
+            {% for item in dashboard.recent_activity %}
+              <div class="stream-item">
+                <div class="stream-main">
+                  <p class="stream-title">{{ item.title }}</p>
+                  <p class="stream-meta">{{ item.type.replace("_", " ").title() }}{% if item.risk_score != "" %} | Score: {{ item.risk_score }}{% endif %} | {{ item.timestamp }}</p>
+                </div>
+                {% if item.verdict %}
+                  <span class="badge {{ 'bad' if item.verdict == 'Phishing' else 'good' }}">{{ item.verdict }}</span>
+                {% endif %}
               </div>
             {% endfor %}
           </div>
-          {% if dashboard.training_error %}
-            <div class="warning">{{ dashboard.training_error }}</div>
-          {% endif %}
-        </div>
-
-        <div class="hero-card">
-          <div class="label">Current Training Context</div>
-          <p class="mini-value" style="margin-bottom: 10px;">{{ dashboard.selected_model }}</p>
-          <div class="mini-label">Dataset Mode</div>
-          <p style="margin-top: 0;">{{ dashboard.dataset_mode }}</p>
-          <div class="mini-label">Rows</div>
-          <p style="margin-top: 0;">Train: {{ dashboard.training_rows if dashboard.training_rows is not none else "N/A" }} | Test: {{ dashboard.test_rows if dashboard.test_rows is not none else "N/A" }}</p>
-          <div class="mini-label">Feature Count</div>
-          <p style="margin-top: 0;">{{ dashboard.feature_count if dashboard.feature_count is not none else "N/A" }}</p>
-          <div class="quick-links">
-            {% for item in dashboard.quick_links %}
-              <a class="chip" href="{{ item.href }}">{{ item.label }}</a>
-            {% endfor %}
-          </div>
-          <div class="label" style="margin-top: 18px;">Recent Activity</div>
-          {% if dashboard.recent_activity %}
-            <ul class="activity-list">
-              {% for item in dashboard.recent_activity %}
-                <li>
-                  <strong>{{ item.type.replace("_", " ").title() }}</strong>:
-                  {{ item.title }}
-                  {% if item.risk_score != "" %} | Score: {{ item.risk_score }}{% endif %}
-                  {% if item.verdict %} | {{ item.verdict }}{% endif %}
-                  <br>
-                  <span style="opacity: 0.7;">{{ item.timestamp }}</span>
-                </li>
-              {% endfor %}
-            </ul>
-          {% else %}
-            <p style="margin-top: 0;">No recent activity yet.</p>
-          {% endif %}
-        </div>
-      </div>
-
-      <form method="post" action="/analyze">
-        <input type="text" name="url" placeholder="Enter a URL such as https://example.com/login" value="{{ url_value }}">
-        <button type="submit">Analyze URL</button>
-      </form>
-
-      {% if error %}
-        <div class="error">{{ error }}</div>
-      {% endif %}
-
-      {% if result %}
-        <div class="result-grid">
-          <div class="card">
-            <div class="label">Verdict</div>
-            <span class="verdict {{ 'bad' if result.verdict == 'Phishing' else 'good' }}">{{ result.verdict }}</span>
-          </div>
-          <div class="card">
-            <div class="label">Risk Score</div>
-            <p class="score">{{ result.risk_score }}/100</p>
-          </div>
-          <div class="card">
-            <div class="label">Normalized URL</div>
-            <code>{{ result.normalized_url }}</code>
-          </div>
-        </div>
-
-        {% if result.warnings %}
-          {% for warning in result.warnings %}
-            <div class="warning">{{ warning }}</div>
-          {% endfor %}
+        {% else %}
+          <p class="muted" style="margin: 0;">No recent activity yet.</p>
         {% endif %}
-
-        <div class="result-grid">
-          <div class="card">
-            <div class="label">Why It Was Flagged</div>
-            <ul>
-              {% for item in result.explanation_items %}
-                <li>{{ item }}</li>
-              {% endfor %}
-            </ul>
-          </div>
-          <div class="card">
-            <div class="label">Selected Signals</div>
-            <ul>
-              <li>HTTPS: {{ "Yes" if result.features["https_scheme"] else "No" }}</li>
-              <li>DNS resolved: {{ "Yes" if result.features["dns_resolves"] else "No" }}</li>
-              <li>Shortener: {{ "Yes" if result.features["shortener_domain"] else "No" }}</li>
-              <li>Suspicious TLD: {{ "Yes" if result.features["suspicious_tld"] else "No" }}</li>
-              <li>Password fields: {{ result.features["password_field_count"]|int }}</li>
-              <li>Content keywords: {{ result.features["phishing_keyword_count_content"]|int }}</li>
-            </ul>
-          </div>
-        </div>
-
-        <div style="margin-top: 18px;">
-          <a class="link" href="/analysis-detail?url={{ result.normalized_url|urlencode }}">View Full Analysis Detail</a>
-        </div>
-      {% endif %}
-    </div>
-  </div>
-</body>
-</html>
+      </div>
+    </aside>
+  </section>
+{% endblock %}

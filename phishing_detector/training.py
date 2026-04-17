@@ -356,16 +356,26 @@ def build_plot_manifest(report: Dict, plot_dir: Path) -> Dict:
 
 
 def save_evaluation_plots(report: Dict, plot_dir: Path) -> Dict:
-    from PIL import Image, ImageDraw
+    import os
+    import matplotlib
+
+    mpl_config_dir = (plot_dir / "mplconfig").resolve()
+    mpl_config_dir.mkdir(parents=True, exist_ok=True)
+    os.environ.setdefault("MPLCONFIGDIR", str(mpl_config_dir))
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import seaborn as sns
 
     plot_dir.mkdir(parents=True, exist_ok=True)
+    sns.set_theme(style="whitegrid")
 
     manifest = build_plot_manifest(report, plot_dir)
 
     for model_name, paths in manifest.items():
         curve_data = report["evaluation_curves"][model_name]
         matrix = curve_data["confusion_matrix"]
-        _render_confusion_matrix_png(model_name, matrix, Path(paths["confusion_matrix"]), Image, ImageDraw)
+        _render_confusion_matrix_png(model_name, matrix, Path(paths["confusion_matrix"]), plt, sns)
 
         roc = curve_data["roc_curve"]
         _render_roc_curve_png(
@@ -373,73 +383,48 @@ def save_evaluation_plots(report: Dict, plot_dir: Path) -> Dict:
             roc,
             report["metrics"][model_name]["roc_auc"],
             Path(paths["roc_curve"]),
-            Image,
-            ImageDraw,
+            plt,
+            sns,
         )
 
     return manifest
 
 
-def _render_confusion_matrix_png(model_name: str, matrix: Dict[str, int], output_path: Path, image_cls, draw_cls) -> None:
-    image = image_cls.new("RGB", (560, 460), "white")
-    draw = draw_cls.Draw(image)
-    draw.text((20, 20), f"{model_name} Confusion Matrix", fill="black")
-    draw.text((150, 70), "Pred Legit", fill="black")
-    draw.text((330, 70), "Pred Phish", fill="black")
-    draw.text((20, 170), "Actual Legit", fill="black")
-    draw.text((20, 310), "Actual Phish", fill="black")
-
-    cells = [
-        ((140, 110, 280, 250), matrix["tn"], (214, 234, 248)),
-        ((300, 110, 440, 250), matrix["fp"], (253, 224, 221)),
-        ((140, 270, 280, 410), matrix["fn"], (254, 235, 200)),
-        ((300, 270, 440, 410), matrix["tp"], (209, 250, 229)),
+def _render_confusion_matrix_png(model_name: str, matrix: Dict[str, int], output_path: Path, plt, sns) -> None:
+    heatmap_data = [
+        [int(matrix["tn"]), int(matrix["fp"])],
+        [int(matrix["fn"]), int(matrix["tp"])],
     ]
-    for (x1, y1, x2, y2), value, color in cells:
-        draw.rectangle((x1, y1, x2, y2), fill=color, outline="black", width=2)
-        draw.text((x1 + 58, y1 + 56), str(value), fill="black")
-    image.save(output_path)
+    fig, ax = plt.subplots(figsize=(6.2, 4.8))
+    sns.heatmap(
+        heatmap_data,
+        annot=True,
+        fmt="d",
+        cmap="Blues",
+        cbar=False,
+        xticklabels=["Pred Legit", "Pred Phish"],
+        yticklabels=["Actual Legit", "Actual Phish"],
+        ax=ax,
+    )
+    ax.set_title(f"{model_name} Confusion Matrix")
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=150)
+    plt.close(fig)
 
 
-def _render_roc_curve_png(model_name: str, roc: Dict[str, list], auc_value: float, output_path: Path, image_cls, draw_cls) -> None:
-    width, height = 640, 480
-    margin_left, margin_bottom, margin_top, margin_right = 70, 60, 30, 30
-    plot_width = width - margin_left - margin_right
-    plot_height = height - margin_top - margin_bottom
-
-    image = image_cls.new("RGB", (width, height), "white")
-    draw = draw_cls.Draw(image)
-    draw.text((20, 10), f"{model_name} ROC Curve  AUC={auc_value:.4f}", fill="black")
-
-    x0, y0 = margin_left, height - margin_bottom
-    x1, y1 = width - margin_right, margin_top
-    draw.line((x0, y0, x0, y1), fill="black", width=2)
-    draw.line((x0, y0, x1, y0), fill="black", width=2)
-    draw.text((width // 2 - 60, height - 25), "False Positive Rate", fill="black")
-    draw.text((10, 20), "True Positive Rate", fill="black")
-
-    for tick in range(6):
-        fraction = tick / 5
-        px = x0 + fraction * plot_width
-        py = y0 - fraction * plot_height
-        draw.line((px, y0, px, y0 + 5), fill="black")
-        draw.line((x0 - 5, py, x0, py), fill="black")
-        draw.text((px - 8, y0 + 10), f"{fraction:.1f}", fill="black")
-        draw.text((20, py - 6), f"{fraction:.1f}", fill="black")
-
-    draw.line((x0, y0, x1, y1), fill=(150, 150, 150), width=1)
-
-    points = []
-    for fpr_value, tpr_value in zip(roc["fpr"], roc["tpr"]):
-        px = x0 + float(fpr_value) * plot_width
-        py = y0 - float(tpr_value) * plot_height
-        points.append((px, py))
-    if len(points) >= 2:
-        draw.line(points, fill=(20, 99, 255), width=3)
-    elif len(points) == 1:
-        px, py = points[0]
-        draw.ellipse((px - 2, py - 2, px + 2, py + 2), fill=(20, 99, 255))
-    image.save(output_path)
+def _render_roc_curve_png(model_name: str, roc: Dict[str, list], auc_value: float, output_path: Path, plt, _sns) -> None:
+    fig, ax = plt.subplots(figsize=(6.8, 4.8))
+    ax.plot(roc["fpr"], roc["tpr"], color="#1f77b4", linewidth=2.2, label=f"ROC (AUC={auc_value:.4f})")
+    ax.plot([0, 1], [0, 1], linestyle="--", color="gray", linewidth=1.2, label="Random baseline")
+    ax.set_title(f"{model_name} ROC Curve")
+    ax.set_xlabel("False Positive Rate")
+    ax.set_ylabel("True Positive Rate")
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1.02)
+    ax.legend(loc="lower right")
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=150)
+    plt.close(fig)
 
 
 def main() -> None:

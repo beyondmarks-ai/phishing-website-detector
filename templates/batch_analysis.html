@@ -1,235 +1,132 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Batch Analysis</title>
-  <style>
-    :root {
-      --bg: #f4efe6;
-      --panel: rgba(255, 252, 247, 0.9);
-      --ink: #1f2430;
-      --accent: #0f766e;
-      --danger: #b42318;
-      --line: rgba(31, 36, 48, 0.12);
-      --shadow: 0 24px 80px rgba(31, 36, 48, 0.12);
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Georgia, "Times New Roman", serif;
-      color: var(--ink);
-      background:
-        radial-gradient(circle at top left, rgba(15, 118, 110, 0.20), transparent 35%),
-        radial-gradient(circle at right 20%, rgba(180, 71, 8, 0.18), transparent 30%),
-        linear-gradient(160deg, #f7f1e8, #efe3d3 65%, #eadaca);
-      min-height: 100vh;
-      padding: 32px 16px;
-    }
-    .wrap { max-width: 1120px; margin: 0 auto; }
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(16px);
-      padding: 28px;
-    }
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      align-items: flex-start;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-    .link {
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: bold;
-      padding-top: 10px;
-    }
-    h1 {
-      margin: 0 0 8px;
-      font-size: clamp(2rem, 4vw, 3.2rem);
-      line-height: 0.95;
-      letter-spacing: -0.04em;
-    }
-    .lead { margin: 0; max-width: 740px; }
-    form {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      align-items: center;
-      margin: 22px 0;
-    }
-    input[type="file"] {
-      padding: 12px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.85);
-    }
-    button {
-      border: none;
-      border-radius: 14px;
-      padding: 12px 18px;
-      background: var(--ink);
-      color: white;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    .secondary {
-      background: rgba(255,255,255,0.85);
-      color: var(--ink);
-      border: 1px solid var(--line);
-    }
-    .error {
-      border-radius: 14px;
-      padding: 12px 14px;
-      margin: 12px 0;
-      background: rgba(180, 35, 24, 0.10);
-      color: var(--danger);
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
-      margin: 18px 0;
-    }
-    .card {
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 16px;
-      background: rgba(255,255,255,0.72);
-    }
-    .label {
-      font-size: 0.82rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      opacity: 0.7;
-      margin-bottom: 8px;
-    }
-    .value {
-      font-size: 1.6rem;
-      margin: 0;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 16px;
-    }
-    th, td {
-      text-align: left;
-      border-bottom: 1px solid var(--line);
-      padding: 10px 8px;
-      vertical-align: top;
-    }
-    th {
-      font-size: 0.82rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      opacity: 0.7;
-    }
-    .activity-list {
-      padding-left: 20px;
-      margin-top: 8px;
-    }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <div class="panel">
-      <div class="topbar">
-        <div>
-          <h1>Batch Analysis</h1>
-          <p class="lead">Upload a CSV with a URL-like column such as <code>url</code>, <code>URL</code>, or <code>Domain</code>. The app will analyze each row and let you download the combined results as CSV.</p>
+{% extends "base.html" %}
+{% set active_page = "batch" %}
+{% block title %}Batch Analysis{% endblock %}
+
+{% block content %}
+  <section class="page-hero">
+    <div>
+      <p class="eyebrow"><span class="material-symbols-outlined">layers</span> Security Protocol 09</p>
+      <h1>Batch Analysis.</h1>
+      <p class="lead">Upload a CSV with a URL-like column such as <code>url</code>, <code>URL</code>, or <code>Domain</code>. The app will analyze each row and let you download the combined results as CSV.</p>
+    </div>
+    <div class="hero-action">
+      <a class="btn ghost" href="/"><span class="material-symbols-outlined">dashboard</span> Back To Dashboard</a>
+    </div>
+  </section>
+
+  {% if error %}
+    <div class="alert error">{{ error }}</div>
+  {% endif %}
+
+  <section class="layout-12">
+    <div class="span-7">
+      <div class="panel">
+        <h2>Dataset Intake</h2>
+        <div class="card" style="min-height: 280px;">
+          <form method="post" action="/batch-analysis" enctype="multipart/form-data">
+            <div class="label">Run Analysis</div>
+            <div class="scan-form">
+              <input type="file" name="file" accept=".csv,text/csv">
+              <button type="submit"><span class="material-symbols-outlined">upload_file</span> Run Batch Analysis</button>
+            </div>
+          </form>
+
+          <form method="post" action="/batch-analysis-export" enctype="multipart/form-data" style="margin-top: 22px;">
+            <div class="label">Export Results</div>
+            <div class="scan-form">
+              <input type="file" name="file" accept=".csv,text/csv">
+              <button class="secondary" type="submit"><span class="material-symbols-outlined">download</span> Download CSV Results</button>
+            </div>
+          </form>
         </div>
-        <a class="link" href="/">Back To Dashboard</a>
-      </div>
 
-      {% if error %}
-        <div class="error">{{ error }}</div>
-      {% endif %}
-
-      <form method="post" action="/batch-analysis" enctype="multipart/form-data">
-        <input type="file" name="file" accept=".csv,text/csv">
-        <button type="submit">Run Batch Analysis</button>
-      </form>
-
-      <form method="post" action="/batch-analysis-export" enctype="multipart/form-data">
-        <input type="file" name="file" accept=".csv,text/csv">
-        <button class="secondary" type="submit">Download CSV Results</button>
-      </form>
-
-      <div class="card">
-        <div class="label">Recent Activity</div>
-        {% if recent_activity %}
-          <ul class="activity-list">
-            {% for item in recent_activity %}
-              <li>
-                <strong>{{ item.type.replace("_", " ").title() }}</strong>:
-                {{ item.title }}{% if item.verdict %} | {{ item.verdict }}{% endif %}
-                <br>
-                <span style="opacity: 0.7;">{{ item.timestamp }}</span>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p style="margin-top: 0;">No recent activity yet.</p>
+        {% if summary %}
+          <div class="grid" style="margin-top: 18px;">
+            <div class="card">
+              <div class="label">Filename</div>
+              <p class="value-sm">{{ summary.filename }}</p>
+            </div>
+            <div class="card">
+              <div class="label">Rows</div>
+              <p class="value">{{ summary.total_rows }}</p>
+            </div>
+            <div class="card">
+              <div class="label">Phishing</div>
+              <p class="value" style="color: var(--danger);">{{ summary.phishing_count }}</p>
+            </div>
+            <div class="card">
+              <div class="label">Legitimate</div>
+              <p class="value" style="color: var(--success);">{{ summary.legitimate_count }}</p>
+            </div>
+            <div class="card">
+              <div class="label">Errors</div>
+              <p class="value">{{ summary.error_count }}</p>
+            </div>
+          </div>
         {% endif %}
       </div>
-
-      {% if summary %}
-        <div class="grid">
-          <div class="card">
-            <div class="label">Filename</div>
-            <p class="value" style="font-size: 1.1rem;">{{ summary.filename }}</p>
-          </div>
-          <div class="card">
-            <div class="label">Rows</div>
-            <p class="value">{{ summary.total_rows }}</p>
-          </div>
-          <div class="card">
-            <div class="label">Phishing</div>
-            <p class="value">{{ summary.phishing_count }}</p>
-          </div>
-          <div class="card">
-            <div class="label">Legitimate</div>
-            <p class="value">{{ summary.legitimate_count }}</p>
-          </div>
-          <div class="card">
-            <div class="label">Errors</div>
-            <p class="value">{{ summary.error_count }}</p>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="label">Preview</div>
-          <table>
-            <thead>
-              <tr>
-                <th>Row</th>
-                <th>Input URL</th>
-                <th>Verdict</th>
-                <th>Risk Score</th>
-                <th>Top Signal</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for row in summary.rows[:20] %}
-                <tr>
-                  <td>{{ row.row_number }}</td>
-                  <td>{{ row.input_url }}</td>
-                  <td>{{ row.verdict }}</td>
-                  <td>{{ row.risk_score }}</td>
-                  <td>{{ row.top_signal }}</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% endif %}
     </div>
-  </div>
-</body>
-</html>
+
+    <aside class="span-5">
+      <div class="card-muted">
+        <h2>Dataset Requirements</h2>
+        <ul>
+          <li>Accepted format: standard CSV file.</li>
+          <li>Supported URL columns include <code>url</code>, <code>URL</code>, <code>Domain</code>, <code>website</code>, <code>link</code>, or <code>uri</code>.</li>
+          <li>Use the first form to preview results, or the second form to download CSV output directly.</li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-top: 18px;">
+        <div class="label">Recent Activity</div>
+        {% if recent_activity %}
+          <div class="stream">
+            {% for item in recent_activity %}
+              <div class="stream-item">
+                <div class="stream-main">
+                  <p class="stream-title">{{ item.title }}</p>
+                  <p class="stream-meta">{{ item.type.replace("_", " ").title() }} | {{ item.timestamp }}</p>
+                </div>
+                {% if item.verdict %}
+                  <span class="badge {{ 'bad' if item.verdict == 'Phishing' else 'good' }}">{{ item.verdict }}</span>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="muted" style="margin: 0;">No recent activity yet.</p>
+        {% endif %}
+      </div>
+    </aside>
+  </section>
+
+  {% if summary %}
+    <section class="card" style="margin-top: 24px;">
+      <div class="label">Preview</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Row</th>
+              <th>Input URL</th>
+              <th>Verdict</th>
+              <th>Risk Score</th>
+              <th>Top Signal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in summary.rows[:20] %}
+              <tr>
+                <td>{{ row.row_number }}</td>
+                <td class="mono">{{ row.input_url }}</td>
+                <td><span class="badge {{ 'bad' if row.verdict == 'Phishing' else 'good' }}">{{ row.verdict }}</span></td>
+                <td>{{ row.risk_score }}</td>
+                <td>{{ row.top_signal }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+{% endblock %}

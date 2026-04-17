@@ -16,18 +16,22 @@ class NormalizeUrlTests(unittest.TestCase):
 
 
 class FeatureExtractionTests(unittest.TestCase):
+    @patch("phishing_detector.feature_extraction.ENABLE_REPUTATION_LOOKUPS", False)
     def test_ip_address_host_detected(self):
         result = build_feature_vector("http://192.168.0.1/login")
         self.assertEqual(result.features["ip_address_host"], 1.0)
 
+    @patch("phishing_detector.feature_extraction.ENABLE_REPUTATION_LOOKUPS", False)
     def test_shortener_detected(self):
         result = build_feature_vector("https://bit.ly/free")
         self.assertEqual(result.features["shortener_domain"], 1.0)
 
+    @patch("phishing_detector.feature_extraction.ENABLE_REPUTATION_LOOKUPS", False)
     def test_suspicious_tld_detected(self):
         result = build_feature_vector("http://example.zip/login")
         self.assertEqual(result.features["suspicious_tld"], 1.0)
 
+    @patch("phishing_detector.feature_extraction.ENABLE_REPUTATION_LOOKUPS", False)
     @patch("phishing_detector.feature_extraction._domain_age_days", return_value=10)
     @patch("phishing_detector.feature_extraction._fetch_html", return_value="")
     @patch("phishing_detector.feature_extraction.socket.gethostbyname", return_value="127.0.0.1")

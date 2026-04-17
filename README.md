@@ -7,6 +7,7 @@ Local MVP for phishing website detection using a Flask web app, multi-layer feat
 - Single URL analysis with risk score and explanation
 - Full detail page for one analyzed URL
 - JSON and Markdown export for a single analysis
+- JSON API endpoint for programmatic analysis
 - Training report page with metrics and evaluation plots
 - Batch CSV analysis with downloadable results
 - Recent activity tracking
@@ -41,12 +42,29 @@ python -m phishing_detector.training --data data/sample_urls.csv --artifact data
 python app.py
 ```
 
+## API Security Settings
+
+The JSON endpoint `POST /api/analyze` supports optional token auth and built-in rate limiting.
+
+```text
+API_REQUIRE_AUTH=1
+API_AUTH_TOKEN=replace-with-strong-token
+API_RATE_LIMIT_WINDOW_SECONDS=60
+API_RATE_LIMIT_MAX_REQUESTS=30
+```
+
+Send token via:
+
+- `Authorization: Bearer <token>`
+- or `X-API-Key: <token>`
+
 ## App Pages
 
 - `/` dashboard + single URL analyzer
 - `/analysis-detail?url=...` full explanation for one URL
 - `/analysis-export.json?url=...` JSON export for one URL
 - `/analysis-export.md?url=...` Markdown export for one URL
+- `/api/analyze` POST JSON API for one URL
 - `/training-report` model metrics and evaluation plots
 - `/batch-analysis` batch CSV upload and preview
 - `/settings` read-only runtime configuration view
@@ -87,6 +105,26 @@ Supported dataset styles:
 - Raw URL datasets with columns like `url`, `URL`, `Domain`, `website`
 - Engineered-feature datasets with numeric phishing features plus a label column
 
+## Kaggle Dataset Workflow (Recommended)
+
+1. Download a phishing URL dataset CSV from Kaggle.
+2. Place it under `data/` (example: `data/kaggle_phishing_urls.csv`).
+3. Ensure it has at least one URL-like column (`url`, `URL`, `Domain`, `website`, etc.) and one label column (`label`, `class`, `result`, etc.).
+4. Train and generate full artifacts:
+
+```bash
+python -m phishing_detector.training --data data/kaggle_phishing_urls.csv --artifact data/model_artifact.pkl
+```
+
+5. Review quality in:
+
+- `data/model_artifact_report.json`
+- `data/model_artifact_summary.md`
+- `data/model_artifact_plots/`
+
+Tip:
+- Use a larger dataset for realistic metrics and fewer overfitting artifacts.
+
 Note:
 - Engineered-feature artifacts are for offline experimentation.
 - The live Flask analyzer expects artifacts trained from raw URLs through this project's own feature extractor.
@@ -111,5 +149,7 @@ python -m unittest discover -s tests -v
 ## Notes
 
 - Live checks are best-effort and can fail without stopping the analysis.
+- External reputation lookup is enabled by default and can be disabled with `ENABLE_REPUTATION_LOOKUPS=0`.
+- Stitch redesign source files are stored in `stitch_phishing_detector_ui_redesign/` for design reference and iteration history.
 - The bundled sample dataset is only for demonstration and pipeline verification.
 - Replace it with a real public phishing dataset for better model quality.

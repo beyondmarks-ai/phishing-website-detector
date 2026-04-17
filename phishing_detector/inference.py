@@ -30,7 +30,36 @@ def load_artifact(artifact_path: Path | None = None) -> Dict:
     if not artifact_file.exists():
         raise FileNotFoundError(f"Model artifact not found at {artifact_file}")
     with artifact_file.open("rb") as handle:
-        return pickle.load(handle)
+        loaded = pickle.load(handle)
+    return _normalize_artifact_schema(loaded)
+
+
+def _normalize_artifact_schema(artifact: Dict) -> Dict:
+    if not isinstance(artifact, dict):
+        raise ValueError("Unsupported artifact format: expected a dictionary payload.")
+
+    # Native training artifact format used by this project.
+    if "dataset_mode" in artifact and "model" in artifact:
+        return artifact
+
+    # Colab export bundle format: {"model": ..., "feature_columns": [...], ...}
+    if "model" in artifact and "feature_columns" in artifact:
+        return {
+            "model_name": artifact.get("model_name", "colab_bundle_model"),
+            "model": artifact["model"],
+            "metrics": artifact.get("metrics", {}),
+            "threshold": float(artifact.get("threshold", 0.5)),
+            "feature_order": list(artifact["feature_columns"]),
+            "dataset_mode": artifact.get("dataset_mode", "engineered_features"),
+            "training_rows": int(artifact.get("training_rows", 0)),
+            "feature_count": int(len(artifact["feature_columns"])),
+            "test_rows": int(artifact.get("test_rows", 0)),
+            "evaluation_curves": artifact.get("evaluation_curves", {}),
+        }
+
+    raise ValueError(
+        "Unsupported artifact schema. Expected project artifact or a bundle with feature_columns."
+    )
 
 
 def _feature_row(features: Dict[str, float], feature_order: List[str]) -> pd.DataFrame:
@@ -46,9 +75,29 @@ def _heuristic_adjustment(extraction: FeatureExtractionResult) -> float:
     suspicious += 0.08 if extraction.features["password_field_count"] > 0 else 0.0
     suspicious += 0.08 if extraction.features["title_brand_mismatch"] else 0.0
     suspicious += 0.05 if extraction.features["external_link_ratio"] > 0.8 else 0.0
+    suspicious += 0.1 if extraction.features.get("reputation_blacklist_hit", 0.0) else 0.0
     suspicious += min(extraction.features["phishing_keyword_count_content"] * 0.02, 0.1)
+    suspicious += min(extraction.features.get("stemmed_keyword_count_content", 0.0) * 0.01, 0.05)
     suspicious -= 0.05 if extraction.features["https_scheme"] and extraction.features["ssl_available"] else 0.0
     return suspicious
+
+
+def _trusted_domain_probability_cap(features: Dict[str, float]) -> float | None:
+    if not features.get("trusted_domain", 0.0):
+        return None
+
+    high_risk_overrides = [
+        features.get("reputation_blacklist_hit", 0.0),
+        features.get("ip_address_host", 0.0),
+        features.get("suspicious_tld", 0.0),
+        features.get("shortener_domain", 0.0),
+        features.get("password_field_count", 0.0),
+        features.get("title_brand_mismatch", 0.0),
+    ]
+    if any(value > 0 for value in high_risk_overrides):
+        return None
+
+    return 0.35
 
 
 def _build_feature_sections(features: Dict[str, float]) -> List[Dict]:
@@ -88,6 +137,8 @@ def _build_feature_sections(features: Dict[str, float]) -> List[Dict]:
                 {"label": "External Link Ratio", "value": f"{features['external_link_ratio']:.3f}"},
                 {"label": "Title/Brand Mismatch", "value": "Yes" if features["title_brand_mismatch"] else "No"},
                 {"label": "Content Keyword Hits", "value": int(features["phishing_keyword_count_content"])},
+                {"label": "Stemmed Keyword Hits", "value": int(features.get("stemmed_keyword_count_content", 0.0))},
+                {"label": "Blacklist Reputation Hit", "value": "Yes" if features.get("reputation_blacklist_hit", 0.0) else "No"},
             ],
         },
     ]
@@ -105,6 +156,10 @@ def _build_reassuring_signals(features: Dict[str, float]) -> List[str]:
         reassuring.append("The URL uses a hostname instead of a raw IP address.")
     if not features["title_brand_mismatch"] and features["page_fetch_success"]:
         reassuring.append("The fetched page title did not show an obvious brand mismatch.")
+    if not features.get("reputation_blacklist_hit", 0.0):
+        reassuring.append("The URL was not found in the external reputation feed lookup.")
+    if features.get("trusted_domain", 0.0):
+        reassuring.append("The hostname belongs to a trusted platform domain list.")
     return reassuring[:5]
 
 
@@ -113,7 +168,8 @@ def analyze_url(raw_url: str, artifact_path: Path | None = None) -> AnalysisResu
     dataset_mode = artifact.get("dataset_mode", "raw_url")
     if dataset_mode != "raw_url":
         raise ValueError(
-            "The loaded model artifact was trained on engineered features and is not compatible with live URL analysis."
+            "The loaded model was trained on engineered features and is not compatible with live URL analysis in this app. "
+            "Use a raw-URL artifact from `python -m phishing_detector.training --data <csv_with_url_and_label> --artifact data/model_artifact.pkl`."
         )
     extraction = build_feature_vector(raw_url)
     feature_order = artifact.get("feature_order", FEATURE_COLUMNS)
@@ -121,6 +177,9 @@ def analyze_url(raw_url: str, artifact_path: Path | None = None) -> AnalysisResu
     row = _feature_row(extraction.features, feature_order)
     probability = float(model.predict_proba(row)[0][1])
     probability = min(max(probability + _heuristic_adjustment(extraction), 0.0), 1.0)
+    trusted_cap = _trusted_domain_probability_cap(extraction.features)
+    if trusted_cap is not None:
+        probability = min(probability, trusted_cap)
     risk_score = int(round(probability * 100))
     verdict = "Phishing" if probability >= artifact.get("threshold", 0.5) else "Legitimate"
     explanation_items = list(dict.fromkeys(extraction.explanation_signals))[:6]

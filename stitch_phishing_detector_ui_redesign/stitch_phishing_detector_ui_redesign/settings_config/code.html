@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Settings &amp; Runtime Configuration | PhishGuard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-surface": "#2d3133",
+                        "secondary-fixed": "#ffddb8",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-secondary-fixed-variant": "#653e00",
+                        "on-surface-variant": "#45464d",
+                        "surface-container-highest": "#e0e3e5",
+                        "secondary": "#855300",
+                        "secondary-container": "#fea619",
+                        "outline": "#76777d",
+                        "outline-variant": "#c6c6cd",
+                        "on-tertiary-container": "#009668",
+                        "surface-dim": "#d8dadc",
+                        "surface-container-high": "#e6e8ea",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed": "#131b2e",
+                        "surface-container-low": "#f2f4f6",
+                        "surface-variant": "#e0e3e5",
+                        "on-primary-container": "#7c839b",
+                        "primary-container": "#131b2e",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "surface": "#f7f9fb",
+                        "surface-tint": "#565e74",
+                        "tertiary-fixed": "#6ffbbe",
+                        "on-secondary-container": "#684000",
+                        "inverse-on-surface": "#eff1f3",
+                        "on-tertiary-fixed": "#002113",
+                        "surface-container": "#eceef0",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-primary": "#bec6e0",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed": "#dae2fd",
+                        "secondary-fixed-dim": "#ffb95f",
+                        "primary": "#000000",
+                        "on-surface": "#191c1e",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "background": "#f7f9fb",
+                        "primary-fixed-dim": "#bec6e0",
+                        "tertiary": "#000000",
+                        "tertiary-container": "#002113",
+                        "on-background": "#191c1e",
+                        "surface-bright": "#f7f9fb",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#2a1700"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased">
+<header class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-12 py-6 max-w-screen-2xl mx-auto bg-surface-container-low shadow-[0_32px_64px_-4px_rgba(25,28,30,0.04)]">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-bold text-slate-950 dark:text-white font-['Space_Grotesk'] tracking-tight">PhishGuard</span>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-slate-500 dark:text-slate-400 font-medium hover:text-slate-800 dark:hover:text-slate-200 transition-colors duration-200" href="#">Dashboard</a>
+<a class="text-slate-500 dark:text-slate-400 font-medium hover:text-slate-800 dark:hover:text-slate-200 transition-colors duration-200" href="#">Batch Analysis</a>
+<a class="text-slate-500 dark:text-slate-400 font-medium hover:text-slate-800 dark:hover:text-slate-200 transition-colors duration-200" href="#">Training Report</a>
+<a class="text-slate-950 dark:text-white border-b-2 border-slate-950 dark:border-white pb-1 font-semibold" href="#">Settings</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-['Space_Grotesk'] font-bold tracking-tight text-lg text-slate-950 dark:text-slate-50 opacity-60">Model: Active</span>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-slate-200/50 transition-all active:opacity-80">
+<span class="material-symbols-outlined text-slate-950 dark:text-slate-50">shield</span>
+</button>
+<button class="p-2 rounded-full hover:bg-slate-200/50 transition-all active:opacity-80">
+<span class="material-symbols-outlined text-slate-950 dark:text-slate-50">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<main class="pt-32 pb-20 px-6 md:px-12 max-w-screen-2xl mx-auto">
+<div class="mb-12">
+<h1 class="font-headline text-[3.5rem] font-bold leading-tight tracking-tighter text-primary">System Integrity</h1>
+<p class="text-on-surface-variant font-body text-lg max-w-2xl mt-4">Real-time runtime environment and configuration parameters. All values are read-only for security auditing purposes.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<section class="md:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="bg-surface-container-lowest p-8 rounded-lg shadow-[0_32px_64px_-4px_rgba(25,28,30,0.04)] relative overflow-hidden group transition-all duration-300">
+<div class="flex flex-col gap-6 relative z-10">
+<div class="flex items-center justify-between">
+<h2 class="font-headline text-xl font-medium tracking-tight text-on-surface">Runtime Environment</h2>
+<span class="material-symbols-outlined text-on-primary-container">terminal</span>
+</div>
+<div class="space-y-4">
+<div class="flex flex-col">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-on-primary-container mb-1">Python Version</span>
+<span class="font-mono text-sm bg-surface-container-low px-2 py-1 rounded w-fit">v3.11.4 (Stable)</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-on-primary-container mb-1">Flask Environment</span>
+<span class="font-mono text-sm bg-surface-container-low px-2 py-1 rounded w-fit">production_secure_v2</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-on-primary-container mb-1">Deployment Node</span>
+<span class="font-mono text-sm bg-surface-container-low px-2 py-1 rounded w-fit">ap-southeast-1-edge-04</span>
+</div>
+</div>
+</div>
+<div class="absolute -bottom-10 -right-10 opacity-[0.03] rotate-12 transition-transform group-hover:scale-110 duration-700">
+<span class="material-symbols-outlined text-[160px]">developer_board</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-8 rounded-lg shadow-[0_32px_64px_-4px_rgba(25,28,30,0.04)]">
+<div class="flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<h2 class="font-headline text-xl font-medium tracking-tight text-on-surface">Model Artifacts</h2>
+<span class="material-symbols-outlined text-on-primary-container">neurology</span>
+</div>
+<div class="space-y-6">
+<div class="p-4 bg-surface-container-low rounded-lg">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-on-primary-container block mb-2">Primary Classifier</span>
+<p class="font-mono text-xs break-all text-on-surface opacity-80">/opt/phishguard/models/production/v1.2.pkl</p>
+<div class="flex justify-between mt-2 pt-2 border-t border-outline-variant/20">
+<span class="text-[0.625rem] font-medium text-on-primary-container">SHA-256</span>
+<span class="text-[0.625rem] font-mono text-on-surface">e3b0c442...98fc1c14</span>
+</div>
+</div>
+<div class="p-4 bg-surface-container-low rounded-lg">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-on-primary-container block mb-2">Heuristic Engine</span>
+<p class="font-mono text-xs break-all text-on-surface opacity-80">/opt/phishguard/rules/heuristic_core_v9.json</p>
+<div class="flex justify-between mt-2 pt-2 border-t border-outline-variant/20">
+<span class="text-[0.625rem] font-medium text-on-primary-container">Last Update</span>
+<span class="text-[0.625rem] font-mono text-on-surface">2023-10-24 14:02 UTC</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md:col-span-2 bg-primary-container text-on-primary p-8 rounded-lg relative overflow-hidden">
+<div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+<div>
+<h3 class="font-headline text-2xl font-bold mb-2">Architecture Integrity</h3>
+<p class="text-on-primary-container max-w-md">System is operating within nominal parameters. No drift detected in model performance or infrastructure latency.</p>
+</div>
+<div class="flex gap-4">
+<div class="text-center px-6 py-4 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm">
+<span class="block font-headline text-3xl font-bold">99.98%</span>
+<span class="text-[0.6875rem] font-bold uppercase tracking-tighter opacity-60">SLA Uptime</span>
+</div>
+<div class="text-center px-6 py-4 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm">
+<span class="block font-headline text-3xl font-bold">14ms</span>
+<span class="text-[0.6875rem] font-bold uppercase tracking-tighter opacity-60">Avg Latency</span>
+</div>
+</div>
+</div>
+<div class="absolute inset-0 opacity-10">
+<img class="w-full h-full object-cover grayscale brightness-150" data-alt="abstract technological motherboard background with soft glowing lights and blue digital connectivity textures" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBUi8R-O-9nyh0qNtq5rO02cPB7C0MeUpWAKP-zsX1xw9Lk0J1nQrl6aplY5rBM1xOFyImTQvtjxz3B3hHUjJ7tpDt8rLX2OymGfGmso2Kh6n87_Rq5_RnQkkWL0nN9e7M1zum8VbYV5uG64YJGE3OO9tmDBUEcBbG1YBcF-ByrlM2I7c0AoEXHqSq46xXgTFut_9qTABlPF5hk-2GVgNwkL71clLOdMHQpJ2RP7iMCO9yvKHobPCsh_zBqRn1xKhW5I3NiPAvZ9im"/>
+</div>
+</div>
+</section>
+<aside class="md:col-span-4 flex flex-col gap-6">
+<div class="bg-surface-container-low p-8 rounded-lg">
+<h3 class="font-headline text-sm font-bold uppercase tracking-[0.2em] text-on-primary-container mb-8">Status Indicators</h3>
+<div class="space-y-6">
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-4">
+<div class="w-2 h-2 rounded-full bg-on-tertiary-container shadow-[0_0_12px_rgba(0,150,104,0.5)]"></div>
+<span class="font-medium text-sm">Server Status</span>
+</div>
+<span class="text-[0.6875rem] font-bold text-on-tertiary-container bg-tertiary-fixed-dim/20 px-2 py-0.5 rounded">ONLINE</span>
+</div>
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-4">
+<div class="w-2 h-2 rounded-full bg-on-tertiary-container shadow-[0_0_12px_rgba(0,150,104,0.5)]"></div>
+<span class="font-medium text-sm">Database Cluster</span>
+</div>
+<span class="text-[0.6875rem] font-bold text-on-tertiary-container bg-tertiary-fixed-dim/20 px-2 py-0.5 rounded">CONNECTED</span>
+</div>
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-4">
+<div class="w-2 h-2 rounded-full bg-on-tertiary-container shadow-[0_0_12px_rgba(0,150,104,0.5)]"></div>
+<span class="font-medium text-sm">Auth Gateway</span>
+</div>
+<span class="text-[0.6875rem] font-bold text-on-tertiary-container bg-tertiary-fixed-dim/20 px-2 py-0.5 rounded">ENCRYPTED</span>
+</div>
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-4">
+<div class="w-2 h-2 rounded-full bg-secondary-container shadow-[0_0_12px_rgba(254,166,25,0.5)]"></div>
+<span class="font-medium text-sm">Batch Worker</span>
+</div>
+<span class="text-[0.6875rem] font-bold text-on-secondary-container bg-secondary-container/20 px-2 py-0.5 rounded">IDLE</span>
+</div>
+</div>
+<div class="mt-10 pt-8 border-t border-outline-variant/30">
+<div class="flex flex-col gap-4">
+<div class="flex justify-between items-end">
+<span class="text-[0.6875rem] font-bold text-on-primary-container">System Uptime</span>
+<span class="font-mono text-sm font-bold">14d 08h 22m</span>
+</div>
+<div class="h-1 w-full bg-outline-variant/20 rounded-full overflow-hidden">
+<div class="h-full w-[94%] bg-primary"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-8 rounded-lg shadow-[0_32px_64px_-4px_rgba(25,28,30,0.04)]">
+<h3 class="font-headline text-sm font-bold uppercase tracking-[0.2em] text-on-primary-container mb-8">Resource Usage</h3>
+<div class="space-y-8">
+<div>
+<div class="flex justify-between mb-2">
+<span class="text-xs font-semibold">CPU Utilization</span>
+<span class="text-xs font-mono">12.4%</span>
+</div>
+<div class="flex gap-1">
+<div class="h-3 w-4 bg-primary rounded-sm"></div>
+<div class="h-3 w-4 bg-primary rounded-sm"></div>
+<div class="h-3 w-4 bg-primary rounded-sm"></div>
+<div class="h-3 w-4 bg-surface-container-high rounded-sm"></div>
+<div class="h-3 w-4 bg-surface-container-high rounded-sm"></div>
+<div class="h-3 w-4 bg-surface-container-high rounded-sm"></div>
+<div class="h-3 w-4 bg-surface-container-high rounded-sm"></div>
+<div class="h-3 w-4 bg-surface-container-high rounded-sm"></div>
+<div class="h-3 w-4 bg-surface-container-high rounded-sm"></div>
+<div class="h-3 w-4 bg-surface-container-high rounded-sm"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between mb-2">
+<span class="text-xs font-semibold">RAM Allotment</span>
+<span class="text-xs font-mono">2.1GB / 16GB</span>
+</div>
+<div class="flex gap-1">
+<div class="h-3 w-4 bg-primary rounded-sm"></div>
+<div class="h-3 w-4 bg-primary rounded-sm"></div>
+<div class="h-3 w-4 bg-surface-container-high rounded-sm"></div>
+<div class="h-3 w-4 bg-surface-container-high rounded-sm"></div>
+<div class="h-3 w-4 bg-surface-container-high rounded-sm"></div>
+<div class="h-3 w-4 bg-surface-container-high rounded-sm"></div>
+<div class="h-3 w-4 bg-surface-container-high rounded-sm"></div>
+<div class="h-3 w-4 bg-surface-container-high rounded-sm"></div>
+<div class="h-3 w-4 bg-surface-container-high rounded-sm"></div>
+<div class="h-3 w-4 bg-surface-container-high rounded-sm"></div>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</div>
+<section class="mt-12">
+<h3 class="font-headline text-sm font-bold uppercase tracking-[0.2em] text-on-primary-container mb-6">Service Stream</h3>
+<div class="space-y-[-4px]">
+<div class="bg-surface-container-lowest p-6 rounded-lg shadow-sm border border-outline-variant/10 relative z-[10]">
+<div class="flex items-center gap-6">
+<span class="text-[0.6875rem] font-mono text-on-primary-container">14:22:01.442</span>
+<span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>
+<p class="text-sm font-medium"><span class="opacity-50">Event:</span> Health check heartbeat successful from node ap-southeast-1</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-lg shadow-sm border border-outline-variant/10 relative z-[9] translate-x-2">
+<div class="flex items-center gap-6">
+<span class="text-[0.6875rem] font-mono text-on-primary-container">14:21:44.209</span>
+<span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>
+<p class="text-sm font-medium"><span class="opacity-50">Event:</span> Configuration reload triggered by scheduler - no changes detected</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-lg shadow-sm border border-outline-variant/10 relative z-[8] translate-x-4">
+<div class="flex items-center gap-6">
+<span class="text-[0.6875rem] font-mono text-on-primary-container">14:20:12.881</span>
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+<p class="text-sm font-medium"><span class="opacity-50">Event:</span> Scheduled backup for rule-set database completed in 142ms</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<footer class="mt-20 border-t border-outline-variant/20 py-12 px-12 bg-surface-container-low">
+<div class="max-w-screen-2xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="flex items-center gap-4">
+<span class="font-headline font-bold text-xl tracking-tight">PhishGuard</span>
+<span class="text-on-primary-container text-xs border-l border-outline-variant/40 pl-4">v2.4.0-production-stable</span>
+</div>
+<div class="flex gap-8 text-[0.6875rem] font-bold uppercase tracking-widest text-on-primary-container">
+<a class="hover:text-primary transition-colors" href="#">Documentation</a>
+<a class="hover:text-primary transition-colors" href="#">Compliance Audit</a>
+<a class="hover:text-primary transition-colors" href="#">Security Policy</a>
+</div>
+<div class="text-[0.6875rem] text-on-surface-variant/60 font-mono">
+                Instance ID: PG-SRV-8821-X9
+            </div>
+</div>
+</footer>
+</body></html>

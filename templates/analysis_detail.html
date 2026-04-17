@@ -1,202 +1,101 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Analysis Detail</title>
-  <style>
-    :root {
-      --bg: #f4efe6;
-      --panel: rgba(255, 252, 247, 0.9);
-      --ink: #1f2430;
-      --accent: #0f766e;
-      --danger: #b42318;
-      --warn: #b54708;
-      --line: rgba(31, 36, 48, 0.12);
-      --shadow: 0 24px 80px rgba(31, 36, 48, 0.12);
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Georgia, "Times New Roman", serif;
-      color: var(--ink);
-      background:
-        radial-gradient(circle at top left, rgba(15, 118, 110, 0.20), transparent 35%),
-        radial-gradient(circle at right 20%, rgba(180, 71, 8, 0.18), transparent 30%),
-        linear-gradient(160deg, #f7f1e8, #efe3d3 65%, #eadaca);
-      min-height: 100vh;
-      padding: 32px 16px;
-    }
-    .wrap { max-width: 1120px; margin: 0 auto; }
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(16px);
-      padding: 28px;
-    }
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      align-items: flex-start;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-    .link {
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: bold;
-      padding-top: 10px;
-    }
-    .actions {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin: 8px 0 20px;
-    }
-    .action {
-      display: inline-block;
-      padding: 10px 14px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: rgba(255, 255, 255, 0.72);
-      color: var(--ink);
-      text-decoration: none;
-      font-weight: bold;
-    }
-    h1 {
-      margin: 0 0 8px;
-      font-size: clamp(2rem, 4vw, 3.2rem);
-      line-height: 0.95;
-      letter-spacing: -0.04em;
-    }
-    p.lead { margin: 0; max-width: 720px; }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin: 20px 0;
-    }
-    .card {
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 16px;
-      background: rgba(255, 255, 255, 0.72);
-    }
-    .label {
-      font-size: 0.82rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      opacity: 0.7;
-      margin-bottom: 8px;
-    }
-    .score { font-size: 2.2rem; margin: 0; }
-    .verdict {
-      display: inline-block;
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-weight: bold;
-    }
-    .verdict.bad { background: rgba(180, 35, 24, 0.12); color: var(--danger); }
-    .verdict.good { background: rgba(15, 118, 110, 0.12); color: var(--accent); }
-    .error, .warning {
-      border-radius: 14px;
-      padding: 12px 14px;
-      margin: 12px 0;
-    }
-    .error { background: rgba(180, 35, 24, 0.10); color: var(--danger); }
-    .warning { background: rgba(181, 71, 8, 0.08); color: var(--warn); }
-    ul { padding-left: 20px; }
-    code { word-break: break-all; }
-    table { width: 100%; border-collapse: collapse; }
-    td { border-bottom: 1px solid var(--line); padding: 10px 8px; vertical-align: top; }
-    td:first-child { width: 56%; font-weight: bold; }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <div class="panel">
-      <div class="topbar">
-        <div>
-          <h1>Analysis Detail</h1>
-          <p class="lead">Full feature breakdown and decision context for a single analyzed URL.</p>
-        </div>
-        <a class="link" href="/">Back To Analyzer</a>
-      </div>
+{% extends "base.html" %}
+{% set active_page = "dashboard" %}
+{% block title %}Analysis Detail{% endblock %}
 
-      {% if error %}
-        <div class="error">{{ error }}</div>
-      {% endif %}
+{% block content %}
+  <section class="page-hero">
+    <div>
+      <p class="eyebrow"><span class="material-symbols-outlined">policy</span> Single URL Evidence</p>
+      <h1>Analysis Detail</h1>
+      <p class="lead">Full feature breakdown and decision context for a single analyzed URL.</p>
+    </div>
+    <div class="hero-action">
+      <a class="btn ghost" href="/"><span class="material-symbols-outlined">arrow_back</span> Back To Analyzer</a>
+    </div>
+  </section>
 
-      {% if result %}
-        <div class="actions">
-          <a class="action" href="/analysis-export.json?url={{ result.normalized_url|urlencode }}">Download JSON Report</a>
-          <a class="action" href="/analysis-export.md?url={{ result.normalized_url|urlencode }}">Download Markdown Report</a>
-        </div>
+  {% if error %}
+    <div class="alert error">{{ error }}</div>
+  {% endif %}
 
-        <div class="grid">
-          <div class="card">
-            <div class="label">Verdict</div>
-            <span class="verdict {{ 'bad' if result.verdict == 'Phishing' else 'good' }}">{{ result.verdict }}</span>
-          </div>
-          <div class="card">
-            <div class="label">Risk Score</div>
-            <p class="score">{{ result.risk_score }}/100</p>
-          </div>
-          <div class="card">
-            <div class="label">Model Probability</div>
-            <p class="score">{{ "%.1f"|format(result.probability * 100) }}%</p>
-          </div>
+  {% if result %}
+    <section class="panel">
+      <div class="layout-12">
+        <div class="span-8">
           <div class="card">
             <div class="label">Normalized URL</div>
-            <code>{{ result.normalized_url }}</code>
+            <p class="value-sm mono">{{ result.normalized_url }}</p>
           </div>
         </div>
-
-        {% if result.warnings %}
-          {% for warning in result.warnings %}
-            <div class="warning">{{ warning }}</div>
-          {% endfor %}
-        {% endif %}
-
-        <div class="grid">
-          <div class="card">
-            <div class="label">Suspicious Signals</div>
-            <ul>
-              {% for item in result.suspicious_signals %}
-                <li>{{ item }}</li>
-              {% endfor %}
-            </ul>
-          </div>
-          <div class="card">
-            <div class="label">Reassuring Signals</div>
-            <ul>
-              {% for item in result.reassuring_signals %}
-                <li>{{ item }}</li>
-              {% endfor %}
-            </ul>
+        <div class="span-4">
+          <div class="hero-action">
+            <a class="btn secondary" href="/analysis-export.json?url={{ result.normalized_url|urlencode }}">
+              <span class="material-symbols-outlined">data_object</span> Download JSON Report
+            </a>
+            <a class="btn ghost" href="/analysis-export.md?url={{ result.normalized_url|urlencode }}">
+              <span class="material-symbols-outlined">article</span> Download Markdown Report
+            </a>
           </div>
         </div>
+      </div>
 
-        {% for section in result.feature_sections %}
-          <div class="card" style="margin-top: 20px;">
-            <div class="label">{{ section.title }}</div>
+      <div class="grid" style="margin-top: 18px;">
+        <div class="card">
+          <div class="label">Verdict</div>
+          <span class="verdict {{ 'bad' if result.verdict == 'Phishing' else 'good' }}">{{ result.verdict }}</span>
+        </div>
+        <div class="card">
+          <div class="label">Risk Score</div>
+          <p class="score">{{ result.risk_score }}/100</p>
+        </div>
+        <div class="card">
+          <div class="label">Model Probability</div>
+          <p class="score">{{ "%.1f"|format(result.probability * 100) }}%</p>
+        </div>
+      </div>
+
+      {% if result.warnings %}
+        {% for warning in result.warnings %}
+          <div class="alert warning">{{ warning }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <div class="grid" style="margin-top: 18px;">
+        <div class="card">
+          <div class="label">Suspicious Signals</div>
+          <ul>
+            {% for item in result.suspicious_signals %}
+              <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="card">
+          <div class="label">Reassuring Signals</div>
+          <ul>
+            {% for item in result.reassuring_signals %}
+              <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      {% for section in result.feature_sections %}
+        <div class="card" style="margin-top: 18px;">
+          <div class="label">{{ section.title }}</div>
+          <div class="table-wrap">
             <table>
               <tbody>
                 {% for item in section.rows %}
                   <tr>
-                    <td>{{ item.label }}</td>
+                    <td style="width: 56%; font-weight: 800;">{{ item.label }}</td>
                     <td>{{ item.value }}</td>
                   </tr>
                 {% endfor %}
               </tbody>
             </table>
           </div>
-        {% endfor %}
-      {% endif %}
-    </div>
-  </div>
-</body>
-</html>
+        </div>
+      {% endfor %}
+    </section>
+  {% endif %}
+{% endblock %}

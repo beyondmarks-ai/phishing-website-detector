@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PhishGuard | Model Training Report</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-surface": "#2d3133",
+                        "secondary-fixed": "#ffddb8",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-secondary-fixed-variant": "#653e00",
+                        "on-surface-variant": "#45464d",
+                        "surface-container-highest": "#e0e3e5",
+                        "secondary": "#855300",
+                        "secondary-container": "#fea619",
+                        "outline": "#76777d",
+                        "outline-variant": "#c6c6cd",
+                        "on-tertiary-container": "#009668",
+                        "surface-dim": "#d8dadc",
+                        "surface-container-high": "#e6e8ea",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed": "#131b2e",
+                        "surface-container-low": "#f2f4f6",
+                        "surface-variant": "#e0e3e5",
+                        "on-primary-container": "#7c839b",
+                        "primary-container": "#131b2e",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "surface": "#f7f9fb",
+                        "surface-tint": "#565e74",
+                        "tertiary-fixed": "#6ffbbe",
+                        "on-secondary-container": "#684000",
+                        "inverse-on-surface": "#eff1f3",
+                        "on-tertiary-fixed": "#002113",
+                        "surface-container": "#eceef0",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-primary": "#bec6e0",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed": "#dae2fd",
+                        "secondary-fixed-dim": "#ffb95f",
+                        "primary": "#000000",
+                        "on-surface": "#191c1e",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "background": "#f7f9fb",
+                        "primary-fixed-dim": "#bec6e0",
+                        "tertiary": "#000000",
+                        "tertiary-container": "#002113",
+                        "on-background": "#191c1e",
+                        "surface-bright": "#f7f9fb",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#2a1700"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
+        .font-headline { font-family: 'Space Grotesk', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .shingled-item { margin-top: -4px; transition: transform 0.2s ease; }
+        .shingled-item:hover { transform: translateY(-2px); z-index: 10; }
+    </style>
+</head>
+<body class="text-on-background">
+<!-- Top Navigation Bar -->
+<nav class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-12 py-6 max-w-screen-2xl mx-auto bg-[#f2f4f6] dark:bg-slate-900 shadow-[0_32px_64px_-4px_rgba(25,28,30,0.04)] no-border tonal-shift bg-surface-container-low">
+<div class="text-2xl font-bold text-slate-950 dark:text-white font-['Space_Grotesk']">PhishGuard</div>
+<div class="hidden md:flex items-center space-x-8">
+<a class="text-slate-500 dark:text-slate-400 font-medium hover:text-slate-800 dark:hover:text-slate-200 transition-colors duration-200" href="#">Dashboard</a>
+<a class="text-slate-500 dark:text-slate-400 font-medium hover:text-slate-800 dark:hover:text-slate-200 transition-colors duration-200" href="#">Batch Analysis</a>
+<a class="text-slate-950 dark:text-white border-b-2 border-slate-950 dark:border-white pb-1 font-semibold" href="#">Training Report</a>
+<a class="text-slate-500 dark:text-slate-400 font-medium hover:text-slate-800 dark:hover:text-slate-200 transition-colors duration-200" href="#">Settings</a>
+</div>
+<div class="flex items-center space-x-6">
+<span class="text-label-sm font-bold uppercase tracking-widest text-on-primary-container">Model: Active</span>
+<div class="flex items-center space-x-4">
+<span class="material-symbols-outlined text-slate-950 dark:text-slate-50 p-2 hover:bg-slate-200/50 rounded-full transition-all">shield</span>
+<span class="material-symbols-outlined text-slate-950 dark:text-slate-50 p-2 hover:bg-slate-200/50 rounded-full transition-all">account_circle</span>
+</div>
+</div>
+</nav>
+<main class="pt-32 pb-20 px-12 max-w-screen-2xl mx-auto">
+<!-- Page Header -->
+<header class="mb-16 flex flex-col md:flex-row justify-between items-end gap-8">
+<div class="max-w-3xl">
+<div class="flex items-center space-x-3 mb-4">
+<span class="px-3 py-1 bg-primary-container text-on-primary rounded-full text-[10px] font-bold uppercase tracking-tighter">Report v4.2.0</span>
+<span class="text-label-sm text-outline font-medium">Last Updated: Oct 24, 2023 • 14:02 UTC</span>
+</div>
+<h1 class="font-headline text-6xl font-bold tracking-tight text-primary leading-none mb-6">Training Intelligence</h1>
+<p class="text-body-md text-on-surface-variant leading-relaxed max-w-xl">Comprehensive evaluation of the neural detection engine. This analytical ledger details the convergence metrics and classification performance across heterogeneous threat datasets.</p>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-label-sm text-outline mb-2">Global Health Score</span>
+<div class="font-headline text-5xl font-bold text-primary">99.2<span class="text-xl text-outline-variant">%</span></div>
+</div>
+</header>
+<!-- Bento Grid Metrics -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16">
+<!-- Accuracy -->
+<div class="md:col-span-2 bg-surface-container-lowest p-8 rounded-lg shadow-sm flex flex-col justify-between h-64 hover:bg-surface-bright transition-all group">
+<div>
+<span class="text-label-sm font-bold text-outline-variant uppercase tracking-widest mb-1 block">Primary Metric</span>
+<h3 class="font-headline text-2xl font-medium text-primary">Validation Accuracy</h3>
+</div>
+<div class="flex items-baseline space-x-4">
+<span class="font-headline text-7xl font-bold tracking-tighter text-primary group-hover:scale-105 transition-transform origin-left">0.994</span>
+<span class="flex items-center text-on-tertiary-container bg-tertiary-fixed-dim/20 px-2 py-1 rounded text-xs font-bold">
+<span class="material-symbols-outlined text-sm mr-1">trending_up</span>
+                        +0.2%
+                    </span>
+</div>
+</div>
+<!-- F1 Score -->
+<div class="bg-surface-container-lowest p-8 rounded-lg shadow-sm flex flex-col justify-between hover:bg-surface-bright transition-all">
+<div>
+<span class="text-label-sm font-bold text-outline-variant uppercase tracking-widest mb-1 block">Balance</span>
+<h3 class="font-headline text-xl font-medium text-primary">F1-Score</h3>
+</div>
+<div class="font-headline text-5xl font-bold text-primary">0.988</div>
+</div>
+<!-- Precision -->
+<div class="bg-surface-container-lowest p-8 rounded-lg shadow-sm flex flex-col justify-between hover:bg-surface-bright transition-all">
+<div>
+<span class="text-label-sm font-bold text-outline-variant uppercase tracking-widest mb-1 block">Fidelity</span>
+<h3 class="font-headline text-xl font-medium text-primary">Precision</h3>
+</div>
+<div class="font-headline text-5xl font-bold text-primary">0.991</div>
+</div>
+</section>
+<!-- Visual Analysis Section -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
+<!-- ROC Curve Placeholder -->
+<div class="lg:col-span-2 bg-surface-container-low rounded-lg p-10 flex flex-col h-[500px] relative overflow-hidden">
+<div class="z-10">
+<h2 class="font-headline text-2xl font-bold mb-2">Receiver Operating Characteristic</h2>
+<p class="text-body-md text-on-surface-variant max-w-sm mb-8">Discriminative power across various threshold levels.</p>
+</div>
+<div class="flex-grow flex items-center justify-center border-t border-l border-outline-variant/30 relative">
+<!-- Fake Chart Elements -->
+<div class="absolute inset-0 p-8 flex items-end">
+<svg class="w-full h-full opacity-60" preserveaspectratio="none" viewbox="0 0 100 100">
+<path class="text-primary" d="M0 100 L2 20 C 5 5, 40 2, 100 0" fill="none" stroke="currentColor" stroke-width="0.5"></path>
+<line class="text-outline-variant" stroke="currentColor" stroke-dasharray="2" stroke-width="0.2" x1="0" x2="100" y1="100" y2="0"></line>
+</svg>
+</div>
+<div class="z-10 flex flex-col items-center">
+<span class="material-symbols-outlined text-4xl text-outline mb-4">insights</span>
+<span class="text-label-sm font-bold uppercase tracking-widest text-outline">Interactive Visualization Active</span>
+</div>
+</div>
+<div class="absolute bottom-8 right-8 flex space-x-4">
+<div class="flex items-center text-[10px] uppercase font-bold text-outline tracking-tighter">
+<span class="w-2 h-2 bg-primary rounded-full mr-2"></span> Model Path
+                    </div>
+<div class="flex items-center text-[10px] uppercase font-bold text-outline tracking-tighter">
+<span class="w-2 h-2 border border-outline rounded-full mr-2"></span> Random Baseline
+                    </div>
+</div>
+</div>
+<!-- Confusion Matrix Placeholder -->
+<div class="bg-surface-container-lowest rounded-lg p-8 shadow-sm border border-outline-variant/10">
+<h2 class="font-headline text-xl font-bold mb-6">Confusion Matrix</h2>
+<div class="grid grid-cols-2 gap-2 h-64 mb-6">
+<div class="bg-primary flex flex-col items-center justify-center text-on-primary rounded">
+<span class="text-label-sm opacity-60 mb-1">TP</span>
+<span class="font-headline text-2xl font-bold">14,202</span>
+</div>
+<div class="bg-surface-container-high flex flex-col items-center justify-center rounded">
+<span class="text-label-sm text-outline mb-1">FP</span>
+<span class="font-headline text-2xl font-bold text-primary">82</span>
+</div>
+<div class="bg-surface-container-high flex flex-col items-center justify-center rounded">
+<span class="text-label-sm text-outline mb-1">FN</span>
+<span class="font-headline text-2xl font-bold text-primary">41</span>
+</div>
+<div class="bg-primary flex flex-col items-center justify-center text-on-primary rounded">
+<span class="text-label-sm opacity-60 mb-1">TN</span>
+<span class="font-headline text-2xl font-bold">18,594</span>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-center pb-2 border-b border-surface-container-low">
+<span class="text-body-md text-outline">Sensitivity</span>
+<span class="text-body-md font-bold">99.7%</span>
+</div>
+<div class="flex justify-between items-center pb-2 border-b border-surface-container-low">
+<span class="text-body-md text-outline">Specificity</span>
+<span class="text-body-md font-bold">99.6%</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Detailed Metrics Stream (No Border Table Alternative) -->
+<section class="mb-16">
+<div class="flex items-center justify-between mb-8">
+<h2 class="font-headline text-2xl font-bold">Dataset Performance Breakdown</h2>
+<button class="bg-surface-container-high px-6 py-2 rounded text-label-sm font-bold hover:bg-primary hover:text-on-primary transition-all">Export TSV</button>
+</div>
+<div class="flex flex-col space-y-2">
+<!-- Stream Header (Semantic) -->
+<div class="grid grid-cols-12 px-8 py-3 text-label-sm font-bold text-outline-variant uppercase tracking-widest">
+<div class="col-span-4">Dataset Segment</div>
+<div class="col-span-2">Recall</div>
+<div class="col-span-2">Precision</div>
+<div class="col-span-2">AUC</div>
+<div class="col-span-2 text-right">Status</div>
+</div>
+<!-- Shingled Stream Items -->
+<div class="shingled-item grid grid-cols-12 px-8 py-6 bg-surface-container-lowest rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.02)] items-center">
+<div class="col-span-4 flex items-center space-x-4">
+<div class="w-10 h-10 rounded bg-surface-container-low flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">dns</span>
+</div>
+<div>
+<span class="text-body-md font-bold block">Enterprise Mail Corpus</span>
+<span class="text-[10px] font-mono text-outline">V-DS-9021</span>
+</div>
+</div>
+<div class="col-span-2 font-headline text-lg font-medium">0.998</div>
+<div class="col-span-2 font-headline text-lg font-medium">0.995</div>
+<div class="col-span-2 font-headline text-lg font-medium">0.999</div>
+<div class="col-span-2 text-right">
+<span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed text-[10px] font-bold rounded uppercase">Optimal</span>
+</div>
+</div>
+<div class="shingled-item grid grid-cols-12 px-8 py-6 bg-surface-container-lowest rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.02)] items-center">
+<div class="col-span-4 flex items-center space-x-4">
+<div class="w-10 h-10 rounded bg-surface-container-low flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">language</span>
+</div>
+<div>
+<span class="text-body-md font-bold block">Public Web Archives</span>
+<span class="text-[10px] font-mono text-outline">V-DS-1140</span>
+</div>
+</div>
+<div class="col-span-2 font-headline text-lg font-medium">0.982</div>
+<div class="col-span-2 font-headline text-lg font-medium">0.980</div>
+<div class="col-span-2 font-headline text-lg font-medium">0.985</div>
+<div class="col-span-2 text-right">
+<span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed text-[10px] font-bold rounded uppercase">Optimal</span>
+</div>
+</div>
+<div class="shingled-item grid grid-cols-12 px-8 py-6 bg-surface-container-lowest rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.02)] items-center">
+<div class="col-span-4 flex items-center space-x-4">
+<div class="w-10 h-10 rounded bg-surface-container-low flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">bug_report</span>
+</div>
+<div>
+<span class="text-body-md font-bold block">Adversarial Synthetic Set</span>
+<span class="text-[10px] font-mono text-outline">V-DS-ADVS</span>
+</div>
+</div>
+<div class="col-span-2 font-headline text-lg font-medium text-error">0.924</div>
+<div class="col-span-2 font-headline text-lg font-medium">0.951</div>
+<div class="col-span-2 font-headline text-lg font-medium">0.940</div>
+<div class="col-span-2 text-right">
+<span class="px-3 py-1 bg-secondary-fixed text-on-secondary-fixed text-[10px] font-bold rounded uppercase">Focus Area</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Compliance & Disclaimer Section -->
+<section class="mt-20 border-t border-outline-variant/10 pt-10">
+<div class="flex items-start space-x-6 max-w-4xl opacity-60">
+<span class="material-symbols-outlined text-outline">info</span>
+<div class="text-body-md leading-relaxed text-outline">
+<p class="font-bold mb-2">Technical Disclaimer &amp; Monitoring Note</p>
+<p>This automated report is generated by the PhishGuard Evaluation Pipeline. All data displayed above is intended for model monitoring and internal demonstration purposes only. Performance metrics are calculated based on isolated validation environments and may vary in live deployment scenarios. Do not use these metrics as the sole basis for critical infrastructure security decisions without manual cross-verification of edge-case classification logs.</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Contextual Footer -->
+<footer class="bg-surface-container-low py-12 px-12">
+<div class="max-w-screen-2xl mx-auto flex flex-col md:flex-row justify-between items-center text-label-sm text-outline uppercase tracking-widest font-bold">
+<div class="flex items-center space-x-2">
+<div class="w-2 h-2 rounded-full bg-tertiary-fixed-dim shadow-[0_0_8px_rgba(78,222,163,0.8)]"></div>
+<span>Sentinel System Online</span>
+</div>
+<div class="flex space-x-12 mt-6 md:mt-0">
+<a class="hover:text-primary transition-colors" href="#">Documentation</a>
+<a class="hover:text-primary transition-colors" href="#">API Keys</a>
+<a class="hover:text-primary transition-colors" href="#">Audit Logs</a>
+</div>
+<div class="mt-6 md:mt-0">
+                © 2023 PhishGuard Intelligence
+            </div>
+</div>
+</footer>
+</body></html>

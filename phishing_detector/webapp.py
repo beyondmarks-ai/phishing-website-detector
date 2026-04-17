@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import time
+from collections import defaultdict, deque
 from pathlib import Path
 
 from flask import Flask, Response, abort, render_template, request, send_file
@@ -7,14 +9,58 @@ from flask import Flask, Response, abort, render_template, request, send_file
 from .activity import load_recent_activity, record_batch_run, record_single_analysis
 from .analysis_reporting import build_analysis_json, build_analysis_markdown
 from .batch_analysis import analyze_batch_csv, batch_result_to_csv, build_batch_summary
+from .config import (
+    API_AUTH_TOKEN,
+    API_RATE_LIMIT_MAX_REQUESTS,
+    API_RATE_LIMIT_WINDOW_SECONDS,
+    API_REQUIRE_AUTH,
+)
 from .inference import analyze_url
 from .reporting import build_dashboard_view, build_training_report_view, load_training_report, resolve_data_asset
 from .settings_view import build_settings_view
 
 
+class _ApiRateLimiter:
+    def __init__(self, max_requests: int, window_seconds: int) -> None:
+        self.max_requests = max(max_requests, 1)
+        self.window_seconds = max(window_seconds, 1)
+        self._history = defaultdict(deque)
+
+    def allow(self, key: str, now: float | None = None) -> bool:
+        now_value = time.monotonic() if now is None else now
+        bucket = self._history[key]
+        cutoff = now_value - self.window_seconds
+        while bucket and bucket[0] < cutoff:
+            bucket.popleft()
+        if len(bucket) >= self.max_requests:
+            return False
+        bucket.append(now_value)
+        return True
+
+
+def _extract_auth_token() -> str:
+    auth_header = request.headers.get("Authorization", "").strip()
+    if auth_header.lower().startswith("bearer "):
+        return auth_header[7:].strip()
+    if auth_header:
+        return auth_header
+    return request.headers.get("X-API-Key", "").strip()
+
+
+def _client_key() -> str:
+    forwarded = request.headers.get("X-Forwarded-For", "").strip()
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.remote_addr or "unknown"
+
+
 def create_app() -> Flask:
     template_dir = Path(__file__).resolve().parent.parent / "templates"
     app = Flask(__name__, template_folder=str(template_dir))
+    app.config["api_rate_limiter"] = _ApiRateLimiter(
+        max_requests=API_RATE_LIMIT_MAX_REQUESTS,
+        window_seconds=API_RATE_LIMIT_WINDOW_SECONDS,
+    )
 
     @app.get("/")
     def index():
@@ -127,6 +173,31 @@ def create_app() -> Flask:
                     "Content-Disposition": 'attachment; filename="analysis_report.md"',
                 },
             )
+        except ValueError as exc:
+            return Response(str(exc), status=400, mimetype="text/plain")
+        except FileNotFoundError as exc:
+            return Response(str(exc), status=500, mimetype="text/plain")
+        except Exception as exc:
+            return Response(f"Analysis failed: {exc}", status=500, mimetype="text/plain")
+
+    @app.post("/api/analyze")
+    def api_analyze():
+        if API_REQUIRE_AUTH and API_AUTH_TOKEN:
+            supplied_token = _extract_auth_token()
+            if supplied_token != API_AUTH_TOKEN:
+                return Response("Unauthorized", status=401, mimetype="text/plain")
+
+        limiter = app.config["api_rate_limiter"]
+        if not limiter.allow(_client_key()):
+            return Response("Rate limit exceeded. Retry later.", status=429, mimetype="text/plain")
+
+        payload = request.get_json(silent=True) or {}
+        url_value = payload.get("url", "")
+        try:
+            result = analyze_url(url_value)
+            record_single_analysis(result)
+            body = build_analysis_json(result)
+            return Response(body, mimetype="application/json")
         except ValueError as exc:
             return Response(str(exc), status=400, mimetype="text/plain")
         except FileNotFoundError as exc:

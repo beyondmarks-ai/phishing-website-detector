@@ -3,3 +3,10 @@ __pycache__/
 .venv/
 venv/
 data/recent_activity.json
+data/PhiUSIIL_Phishing_URL_Dataset*.csv
+data/phiusiil_raw_url_training*.csv
+data/model_bundle_phiusiil.pkl
+data/model_artifact_phiusiil_live.pkl
+data/model_artifact_phiusiil_live_report.json
+data/model_artifact_phiusiil_live_summary.md
+data/model_artifact_phiusiil_live_plots/
