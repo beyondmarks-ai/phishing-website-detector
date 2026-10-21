@@ -113,3 +113,10 @@ python -m unittest discover -s tests -v
 - Live checks are best-effort and can fail without stopping the analysis.
 - The bundled sample dataset is only for demonstration and pipeline verification.
 - Replace it with a real public phishing dataset for better model quality.
+
+<!-- beyond-marks-credit:start -->
+---
+### Built by Beyond Marks AI Academy
+
+Developed by **Rakesh Kumar** at [Beyond Marks AI Academy](https://beyondmarks.ai).
+<!-- beyond-marks-credit:end -->
